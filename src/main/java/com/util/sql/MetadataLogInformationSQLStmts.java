@@ -10,20 +10,21 @@ public class MetadataLogInformationSQLStmts {
 		return sql;
 	}
 	
-	public static String selectRecords(String OrgId) {
+	public static String selectRecords(String OrgId,String type) {
 
 		String sql = "SELECT Id "
 				+ " FROM OFSClient__MetadataDescriptionInformation__c"
-				+ " where OFSClient__OrganizationId__c= '" + OrgId + "'";
+				+ " where OFSClient__OrganizationId__c= '" + OrgId 
+				+ "' and OFSClient__Type__c='" + type + "' ";
 		System.out.println(sql);
 		return sql;
 	}
 	
 	public static String getRefreshMetadata(String metadataLogId) {
 
-		String sql = "SELECT Id, Name, OFSClient__MetadataLog__c,OFSClient__Type__c"
-				+ " FROM OFSClient__RefreshMetadata__c"
-				+ " where Id= '"
+		String sql = "SELECT Id, Name, OFSClient__MetadataLogInformation__c,OFSClient__Type__c"
+				+ " FROM OFSClient__RefreshMetadataInformation__c"
+				+ " where OFSClient__MetadataLogInformation__c	= '"
 				+ metadataLogId + "'";
 		System.out.println(sql);
 		return sql;

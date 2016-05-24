@@ -33,7 +33,7 @@ public class MetadataLogSQLStmts {
 
 		String sql = "SELECT Id, Name, OFSServer__MetadataLog__c,OFSServer__Type__c"
 				+ " FROM OFSServer__RefreshMetadata__c"
-				+ " where Id= '"
+				+ " where OFSServer__MetadataLog__c= '"
 				+ metadataLogId + "'";
 		System.out.println(sql);
 		return sql;

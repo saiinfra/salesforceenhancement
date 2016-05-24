@@ -6,9 +6,7 @@ import java.util.List;
 
 import com.domain.EnvironmentDO;
 import com.domain.MetaBean;
-import com.domain.MetadataDescriptionDO;
 import com.domain.MetadataLogDO;
-import com.domain.PackageDO;
 import com.domain.RefreshMetadataDO;
 import com.ds.salesforce.dao.comp.MetadataDescriptionDAO;
 import com.ds.salesforce.dao.comp.RefreshMetadataDAO;
@@ -97,7 +95,7 @@ public class FDRetrieveCompService {
 											bOrgURL, refreshToken,
 											Constants.BaseOrgID));
 					MetadataDescriptionDAO metadataDescriptionDAO = new MetadataDescriptionDAO();
-					for (Iterator iterator = listfromrefreshMetadataTypes
+					for (Iterator<RefreshMetadataDO> iterator = listfromrefreshMetadataTypes
 							.iterator(); iterator.hasNext();) {
 						RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
 								.next();

@@ -103,7 +103,7 @@ public class FDRetrieveClientCompService {
 
 					for (Iterator iterator = listfromrefreshMetadataTypes
 							.iterator(); iterator.hasNext();) {
-						RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
+						RefreshMetadataInformationDO refreshMetadataDO = (RefreshMetadataInformationDO) iterator
 								.next();
 
 						List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
@@ -116,7 +116,7 @@ public class FDRetrieveClientCompService {
 														bOrgURL,
 														refreshToken,
 														Constants.CustomBaseOrgID),
-										envSoureDO.getOrgId());
+										envSoureDO.getOrgId(),refreshMetadataDO.getType());
 
 						if (metabeanListFromDb.size() > 0) {
 

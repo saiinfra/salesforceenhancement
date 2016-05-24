@@ -90,14 +90,14 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 		return null;
 	}
 
-	public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle sfHandle, String orgId) {
+	public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle sfHandle, String orgId,String type) {
 
 		com.sforce.soap.enterprise.sobject.OFSClient__MetadataDescriptionInformation__c metadataDescriptionInformation__c = null;
 		List<MetaBean> list = new ArrayList<MetaBean>();
 		try {
 			EnterpriseConnection conn = sfHandle.getEnterpriseConnection();
 			conn.setQueryOptions(1000);
-			QueryResult queryResults = conn.query(MetadataLogInformationSQLStmts.selectRecords(orgId));
+			QueryResult queryResults = conn.query(MetadataLogInformationSQLStmts.selectRecords(orgId,type));
 			boolean done = false;
 			int loopCount = 0;
 
