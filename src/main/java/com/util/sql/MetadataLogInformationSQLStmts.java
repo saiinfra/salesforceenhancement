@@ -18,4 +18,14 @@ public class MetadataLogInformationSQLStmts {
 		System.out.println(sql);
 		return sql;
 	}
+	
+	public static String getRefreshMetadata(String metadataLogId) {
+
+		String sql = "SELECT Id, Name, OFSClient__MetadataLog__c,OFSClient__Type__c"
+				+ " FROM OFSClient__RefreshMetadata__c"
+				+ " where Id= '"
+				+ metadataLogId + "'";
+		System.out.println(sql);
+		return sql;
+	}
 }

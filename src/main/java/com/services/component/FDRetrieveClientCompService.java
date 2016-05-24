@@ -10,8 +10,12 @@ import com.domain.MetaBean;
 import com.domain.MetadataDescriptionDO;
 import com.domain.MetadataDescriptionInformationDO;
 import com.domain.MetadataLogInformationDO;
+import com.domain.RefreshMetadataDO;
+import com.domain.RefreshMetadataInformationDO;
 import com.ds.salesforce.dao.comp.MetadataDescriptionDAO;
 import com.ds.salesforce.dao.comp.MetadataDescriptionInformationDAO;
+import com.ds.salesforce.dao.comp.RefreshMetadataDAO;
+import com.ds.salesforce.dao.comp.RefreshMetadataInformationDAO;
 import com.exception.SFErrorCodes;
 import com.exception.SFException;
 import com.services.application.RDAppService;
@@ -27,8 +31,8 @@ public class FDRetrieveClientCompService {
 		super();
 	}
 
-	public void retrieve(String bOrgId, String bOrgToken, String bOrgURL, String refreshToken, String orgType,
-			String metadataLogId) {
+	public void retrieve(String bOrgId, String bOrgToken, String bOrgURL,
+			String refreshToken, String orgType, String metadataLogId) {
 
 		MetadataLogInformationDO metadataLogInformationDO = null;
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
@@ -36,21 +40,25 @@ public class FDRetrieveClientCompService {
 		// do pre-processing
 		// does some sanity checks on input variables
 		// updates the refreshed tokens in Environment
-		PreProcessingTask preProcessingTask = new PreProcessingTask(bOrgId, bOrgToken, bOrgURL, refreshToken, orgType,
-				metadataLogId);
+		PreProcessingTask preProcessingTask = new PreProcessingTask(bOrgId,
+				bOrgToken, bOrgURL, refreshToken, orgType, metadataLogId);
 		bOrgToken = preProcessingTask.doPreProcess();
 		// get refreshed base token
 
 		try {
 			// Get Meta data Log details
-			metadataLogInformationDO = RDAppService.findMetadataLogInformation(metadataLogId, fdGetSFoAuthHandleService
-					.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID));
+			metadataLogInformationDO = RDAppService.findMetadataLogInformation(
+					metadataLogId, fdGetSFoAuthHandleService.getSFoAuthHandle(
+							bOrgId, bOrgToken, bOrgURL, refreshToken,
+							Constants.CustomBaseOrgID));
 			// nullify connection
 			fdGetSFoAuthHandleService.setSfHandleToNUll();
 
 			// updating metadataLog to processing state
-			RDAppService.updateMetadataLogInformationStatus(metadataLogInformationDO, Constants.PROCESSING_STATUS,
-					fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken,
+			RDAppService.updateMetadataLogInformationStatus(
+					metadataLogInformationDO, Constants.PROCESSING_STATUS,
+					fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+							bOrgToken, bOrgURL, refreshToken,
 							Constants.CustomBaseOrgID));
 			// nullify connection
 			fdGetSFoAuthHandleService.setSfHandleToNUll();
@@ -58,56 +66,94 @@ public class FDRetrieveClientCompService {
 			if (metadataLogInformationDO.getAction() != null
 					&& (metadataLogInformationDO.getAction().equals("Retrieve"))) {
 				if (metadataLogInformationDO.getStatus() != null
-						&& (metadataLogInformationDO.getStatus().equals(Constants.PROCESSING_STATUS))) {
+						&& (metadataLogInformationDO.getStatus()
+								.equals(Constants.PROCESSING_STATUS))) {
 					System.out.println("Retrieve------");
 					// refresh connection
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
 					RefreshTokens refreshTokens1 = new RefreshTokens();
 					// getting Token
-					String newSToken = refreshTokens1.refreshSFHandle(bOrgId, bOrgToken, bOrgURL,
-							Constants.CustomBaseOrgID, refreshToken);
+					String newSToken = refreshTokens1.refreshSFHandle(bOrgId,
+							bOrgToken, bOrgURL, Constants.CustomBaseOrgID,
+							refreshToken);
 					refreshTokens1.getoAuthToken();
 
 					// Creating EnvironmentDO Object
 					EnvironmentInformationDO envSoureDO = RDAppService.getEnv1(
-							metadataLogInformationDO.getSourceOrgId(), fdGetSFoAuthHandleService.getSFoAuthHandle(
-									bOrgId, bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID));
-					String newSToken1 = refreshTokens1.refreshClientCustomSFHandle(envSoureDO, bOrgId, bOrgToken,
-							bOrgURL, refreshToken);
+							metadataLogInformationDO.getSourceOrgId(),
+							fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+									bOrgToken, bOrgURL, refreshToken,
+									Constants.CustomBaseOrgID));
+					String newSToken1 = refreshTokens1
+							.refreshClientCustomSFHandle(envSoureDO, bOrgId,
+									bOrgToken, bOrgURL, refreshToken);
 					envSoureDO.setToken(newSToken1);
+
+					RefreshMetadataInformationDAO refreshMetadataDAO = new RefreshMetadataInformationDAO();
+
+					List<RefreshMetadataInformationDO> listfromrefreshMetadataTypes = refreshMetadataDAO
+							.findById1(metadataLogId, fdGetSFoAuthHandleService
+									.getSFoAuthHandle(bOrgId, bOrgToken,
+											bOrgURL, refreshToken,
+											Constants.CustomBaseOrgID));
 
 					// delete records from metadatadescriotion table
 
 					MetadataDescriptionInformationDAO metadataDescriptionInformationDAO = new MetadataDescriptionInformationDAO();
 
-					List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO.findById1(
-							metadataLogInformationDO.getId(), fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
-									bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID),
-							envSoureDO.getOrgId());
+					for (Iterator iterator = listfromrefreshMetadataTypes
+							.iterator(); iterator.hasNext();) {
+						RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
+								.next();
 
-					if (metabeanListFromDb.size() > 0) {
+						List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
+								.findById1(
+										metadataLogInformationDO.getId(),
+										fdGetSFoAuthHandleService
+												.getSFoAuthHandle(
+														bOrgId,
+														bOrgToken,
+														bOrgURL,
+														refreshToken,
+														Constants.CustomBaseOrgID),
+										envSoureDO.getOrgId());
 
-						doBulkDeletes(metabeanListFromDb, bOrgId, bOrgToken, bOrgURL, refreshToken);
+						if (metabeanListFromDb.size() > 0) {
+
+							doBulkDeletes(metabeanListFromDb, bOrgId,
+									bOrgToken, bOrgURL, refreshToken);
+
+						}
 
 					}
 
 					// refresh connection
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
-					List<MetaBean> mainMBList = getRetrieveObjListFromSource(metadataLogInformationDO.getLogName(),
-							fdGetSFoAuthHandleService.getSFoAuthHandle(envSoureDO, Constants.CustomBaseOrgID));
+					List<MetaBean> mainMBList = getRetrieveObjListFromSource(
+							metadataLogInformationDO.getLogName(),
+							fdGetSFoAuthHandleService.getSFoAuthHandle(
+									envSoureDO, Constants.CustomBaseOrgID),
+							listfromrefreshMetadataTypes);
 
 					// Do bulk inserts in Base Environment Organisation.
-					doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL, refreshToken);
+					doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL,
+							refreshToken);
 
 					// Update Success message
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
 					// updating metadataLog
-					RDAppService.updateMetadataLogInformationStatus(metadataLogInformationDO,
-							Constants.COMPLETED_STATUS, fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken,
-									bOrgURL, refreshToken, Constants.CustomBaseOrgID));
-					RDAppService.updateDeploymentDetailsInformation(metadataLogId, Constants.RETRIEVE_SUCESS_MESSAGE,
-							metadataLogInformationDO.getSourceOrgId(), fdGetSFoAuthHandleService.getSFoAuthHandle(
-									bOrgId, bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID));
+					RDAppService.updateMetadataLogInformationStatus(
+							metadataLogInformationDO,
+							Constants.COMPLETED_STATUS,
+							fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+									bOrgToken, bOrgURL, refreshToken,
+									Constants.CustomBaseOrgID));
+					RDAppService.updateDeploymentDetailsInformation(
+							metadataLogId, Constants.RETRIEVE_SUCESS_MESSAGE,
+							metadataLogInformationDO.getSourceOrgId(),
+							fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+									bOrgToken, bOrgURL, refreshToken,
+									Constants.CustomBaseOrgID));
 					// nullify connection
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
 				} else {
@@ -121,16 +167,21 @@ public class FDRetrieveClientCompService {
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 				// updating metadataLog
-				RDAppService.updateMetadataLogInformationStatus(metadataLogInformationDO, Constants.ERROR_STATUS,
-						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken,
+				RDAppService.updateMetadataLogInformationStatus(
+						metadataLogInformationDO, Constants.ERROR_STATUS,
+						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+								bOrgToken, bOrgURL, refreshToken,
 								Constants.CustomBaseOrgID));
 
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 				// updating Deploy Details Information
-				RDAppService.updateDeploymentDetailsInformation(metadataLogId, e.getMessage(),
-						metadataLogInformationDO.getSourceOrgId(), fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
-								bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID));
+				RDAppService.updateDeploymentDetailsInformation(metadataLogId,
+						e.getMessage(), metadataLogInformationDO
+								.getSourceOrgId(),
+						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+								bOrgToken, bOrgURL, refreshToken,
+								Constants.CustomBaseOrgID));
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 			} else {
@@ -141,16 +192,21 @@ public class FDRetrieveClientCompService {
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 				// updating metadataLog
-				RDAppService.updateMetadataLogInformationStatus(metadataLogInformationDO, Constants.ERROR_STATUS,
-						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken,
+				RDAppService.updateMetadataLogInformationStatus(
+						metadataLogInformationDO, Constants.ERROR_STATUS,
+						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+								bOrgToken, bOrgURL, refreshToken,
 								Constants.CustomBaseOrgID));
 
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 				// updating Deploy Details Information
-				RDAppService.updateDeploymentDetailsInformation(metadataLogId, e.getMessage(),
-						metadataLogInformationDO.getSourceOrgId(), fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
-								bOrgToken, bOrgURL, refreshToken, Constants.CustomBaseOrgID));
+				RDAppService.updateDeploymentDetailsInformation(metadataLogId,
+						e.getMessage(), metadataLogInformationDO
+								.getSourceOrgId(),
+						fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+								bOrgToken, bOrgURL, refreshToken,
+								Constants.CustomBaseOrgID));
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 			} else {
@@ -159,24 +215,27 @@ public class FDRetrieveClientCompService {
 		}
 	}
 
-	
-	
-	
-	
-	private List<MetaBean> getRetrieveObjListFromSource(String logName, SFoAuthHandle sfHandle) {
+	private List<MetaBean> getRetrieveObjListFromSource(String logName,
+			SFoAuthHandle sfHandle, List<RefreshMetadataInformationDO> listtypes) {
 		SFoAuthHandle sfSourceHandle = null;
 		List<MetaBean> mainMBList = new ArrayList<MetaBean>();
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
 
 		try {
-			for (int k = 0; k < Constants.SFTypes.length; k++) {
-				String contentType = Constants.SFTypes[k];
+
+			for (Iterator iterator = listtypes.iterator(); iterator.hasNext();) {
+				RefreshMetadataInformationDO refreshMetadataInformationDO = (RefreshMetadataInformationDO) iterator
+						.next();
+
+				String contentType = refreshMetadataInformationDO.getType();
 				// getting list of objects from source
 				FDGetComponentsTypesCompService getAllComponents = new FDGetComponentsTypesCompService();
 				// refresh connection
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
-				List<MetaBean> metaBeanList = getAllComponents.listMetadataObjects(logName, contentType, sfHandle);
-				System.out.println("record size of " + contentType + " is : " + metaBeanList.size());
+				List<MetaBean> metaBeanList = getAllComponents
+						.listMetadataObjects(logName, contentType, sfHandle);
+				System.out.println("record size of " + contentType + " is : "
+						+ metaBeanList.size());
 				mainMBList.addAll(metaBeanList);
 				if (sfSourceHandle != null) {
 					sfSourceHandle.nullify();
@@ -184,20 +243,22 @@ public class FDRetrieveClientCompService {
 				sfSourceHandle = null;
 				fdGetSFoAuthHandleService.setSfHandleToNUll();
 			}
-			System.out.println("Total record size of all contenttypes is : " + mainMBList.size());
+			System.out.println("Total record size of all contenttypes is : "
+					+ mainMBList.size());
 		} catch (Exception e) {
 			if (sfSourceHandle != null) {
 				sfSourceHandle.nullify();
 			}
 			sfSourceHandle = null;
 			fdGetSFoAuthHandleService.setSfHandleToNUll();
-			throw new SFException(e.toString(), SFErrorCodes.SF_ListObject_Error);
+			throw new SFException(e.toString(),
+					SFErrorCodes.SF_ListObject_Error);
 		}
 		return mainMBList;
 	}
 
-	private void doBulkInserts(List<MetaBean> mainMBList, String bOrgId, String bOrgToken, String bOrgURL,
-			String refreshToken) {
+	private void doBulkInserts(List<MetaBean> mainMBList, String bOrgId,
+			String bOrgToken, String bOrgURL, String refreshToken) {
 		int chunkCount = 0, rem = 0, start = 0, end = Constants.ChunkSize;
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
 
@@ -216,15 +277,20 @@ public class FDRetrieveClientCompService {
 
 		// updating records
 		for (int i = 0; i < chunkCount; i++) {
-			System.out.println("Record Update start: " + start + " ~ end: " + end);
-			System.out.println("Updating " + (i + 1) + " set of " + Constants.ChunkSize + " records out of total "
-					+ mainMBList.size() + " records" + " with start : " + start + " end :" + end);
+			System.out.println("Record Update start: " + start + " ~ end: "
+					+ end);
+			System.out.println("Updating " + (i + 1) + " set of "
+					+ Constants.ChunkSize + " records out of total "
+					+ mainMBList.size() + " records" + " with start : " + start
+					+ " end :" + end);
 			List<MetaBean> l = mainMBList.subList(start, end);
 			CsvFileWriter1.writeCsvFile(l, Constants.Retrieve_CSV_File);
 			BulkInsertService bulkService = new BulkInsertService();
-			bulkService.insertInto(Constants.MetadataDescriptionInformation_Name, Constants.Retrieve_CSV_File,
-					fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken,
-							Constants.CustomBaseOrgID));
+			bulkService.insertInto(
+					Constants.MetadataDescriptionInformation_Name,
+					Constants.Retrieve_CSV_File, fdGetSFoAuthHandleService
+							.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL,
+									refreshToken, Constants.CustomBaseOrgID));
 			if ((mainMBList.size() - end) > Constants.ChunkSize) {
 				start = end;
 				end = start + (Constants.ChunkSize);
@@ -235,11 +301,9 @@ public class FDRetrieveClientCompService {
 			fdGetSFoAuthHandleService.setSfHandleToNUll();
 		}
 	}
-	
-	
-	
-	private void doBulkDeletes(List<MetaBean> mainMBList, String bOrgId, String bOrgToken, String bOrgURL,
-			String refreshToken) {
+
+	private void doBulkDeletes(List<MetaBean> mainMBList, String bOrgId,
+			String bOrgToken, String bOrgURL, String refreshToken) {
 		int chunkCount = 0, rem = 0, start = 0, end = Constants.ChunkSize;
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
 
@@ -258,15 +322,20 @@ public class FDRetrieveClientCompService {
 
 		// updating records
 		for (int i = 0; i < chunkCount; i++) {
-			System.out.println("Record Update start: " + start + " ~ end: " + end);
-			System.out.println("Updating " + (i + 1) + " set of " + Constants.ChunkSize + " records out of total "
-					+ mainMBList.size() + " records" + " with start : " + start + " end :" + end);
+			System.out.println("Record Update start: " + start + " ~ end: "
+					+ end);
+			System.out.println("Updating " + (i + 1) + " set of "
+					+ Constants.ChunkSize + " records out of total "
+					+ mainMBList.size() + " records" + " with start : " + start
+					+ " end :" + end);
 			List<MetaBean> l = mainMBList.subList(start, end);
 			CsvFileWriter1.writeCsvFile1(l, Constants.Retrieve_CSV_File);
 			BulkDeleteService bulkService = new BulkDeleteService();
-			bulkService.deleteFrom(Constants.MetadataDescriptionInformation_Name, Constants.Retrieve_CSV_File,
-					fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL, refreshToken,
-							Constants.CustomBaseOrgID));
+			bulkService.deleteFrom(
+					Constants.MetadataDescriptionInformation_Name,
+					Constants.Retrieve_CSV_File, fdGetSFoAuthHandleService
+							.getSFoAuthHandle(bOrgId, bOrgToken, bOrgURL,
+									refreshToken, Constants.CustomBaseOrgID));
 			if ((mainMBList.size() - end) > Constants.ChunkSize) {
 				start = end;
 				end = start + (Constants.ChunkSize);

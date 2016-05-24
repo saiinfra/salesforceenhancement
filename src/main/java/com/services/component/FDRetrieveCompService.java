@@ -88,40 +88,49 @@ public class FDRetrieveCompService {
 
 					RefreshMetadataDAO refreshMetadataDAO = new RefreshMetadataDAO();
 
-					
-					//query refreshmetadata for metadatalog id and get all types
-					
+					// query refreshmetadata for metadatalog id and get all
+					// types
+
 					List<RefreshMetadataDO> listfromrefreshMetadataTypes = refreshMetadataDAO
 							.findById1(metadataLogId, fdGetSFoAuthHandleService
 									.getSFoAuthHandle(bOrgId, bOrgToken,
 											bOrgURL, refreshToken,
 											Constants.BaseOrgID));
-
 					MetadataDescriptionDAO metadataDescriptionDAO = new MetadataDescriptionDAO();
+					for (Iterator iterator = listfromrefreshMetadataTypes
+							.iterator(); iterator.hasNext();) {
+						RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
+								.next();
+
+						List<MetaBean> metabeanListFromDb = metadataDescriptionDAO
+								.findById1(metadataLogDO.getId(),
+										fdGetSFoAuthHandleService
+												.getSFoAuthHandle(bOrgId,
+														bOrgToken, bOrgURL,
+														refreshToken,
+														Constants.BaseOrgID),
+										envSoureDO.getOrgId(), bOrgId,
+										bOrgToken, bOrgURL, refreshToken,
+										refreshMetadataDO.getType());
+						if (metabeanListFromDb.size() > 0) {
+
+							doBulkDeletes(metabeanListFromDb, bOrgId,
+									bOrgToken, bOrgURL, refreshToken);
+
+						}
+						metabeanListFromDb = null;
+
+					}
 
 					// delete components from metadata description table
 
-					List<MetaBean> metabeanListFromDb = metadataDescriptionDAO
-							.findById1(metadataLogDO.getId(),
-									fdGetSFoAuthHandleService.getSFoAuthHandle(
-											bOrgId, bOrgToken, bOrgURL,
-											refreshToken, Constants.BaseOrgID),
-									envSoureDO.getOrgId(), bOrgId, bOrgToken,
-									bOrgURL, refreshToken);
-					metadataDescriptionDAO = null;
-					if (metabeanListFromDb.size() > 0) {
-
-						doBulkDeletes(metabeanListFromDb, bOrgId, bOrgToken,
-								bOrgURL, refreshToken);
-
-					}
-					metabeanListFromDb = null;
 					// refresh connection
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
 					List<MetaBean> mainMBList = getRetrieveObjListFromSource(
 							metadataLogDO.getLogName(),
 							fdGetSFoAuthHandleService.getSFoAuthHandle(
-									envSoureDO, Constants.CustomOrgID));
+									envSoureDO, Constants.CustomOrgID),
+							listfromrefreshMetadataTypes);
 
 					System.out.println("source Organization Id "
 							+ envSoureDO.getOrgId());
@@ -205,14 +214,18 @@ public class FDRetrieveCompService {
 	}
 
 	private List<MetaBean> getRetrieveObjListFromSource(String logName,
-			SFoAuthHandle sfHandle) {
+			SFoAuthHandle sfHandle, List<RefreshMetadataDO> typesList) {
 		SFoAuthHandle sfSourceHandle = null;
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
 
 		List<MetaBean> mainMBList = new ArrayList<MetaBean>();
 		try {
-			for (int k = 0; k < Constants.SFTypes.length; k++) {
-				String contentType = Constants.SFTypes[k];
+
+			for (Iterator iterator = mainMBList.iterator(); iterator.hasNext();) {
+				RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
+						.next();
+
+				String contentType = refreshMetadataDO.getType();
 				// getting list of objects from source
 				FDGetComponentsTypesCompService getAllComponents = new FDGetComponentsTypesCompService();
 				// refresh connection

@@ -85,7 +85,7 @@ public class ForceDepService {
 		// executeScript(Constants.userId, Constants.passwd,
 		// Constants.serverURL,"a0161000002rbAS");
 
-		String bOrgId = "00D36000000L6NwEAK";
+		/*String bOrgId = "00D36000000L6NwEAK";
 		String bOrgRefreshToken = "5Aep861QbHyftz0nI9EQCBdPQPngCvXhaRLMS0L0bB8yu6je7XkcRWEctxFWthwlThi8M1yb0IPI6OEGxGbgXbk";
 		String bOrgToken = "00D36000000L6Nw!AQgAQCN23l6wrC62gnXrMttaTtiUNlj3Qg5JyOFZ4eUkc2AaCjyNvOrUh0sYlNEr_UqHLwq8v_zNnA_3KQMhjg8Xe4jnccI4";
 		String metadataLogId = "a0536000004vKKC";
@@ -108,7 +108,7 @@ public class ForceDepService {
 				bOrgRefreshToken, bOrgURL);
 		MultiPleDeploymentDO multiPleDeploymentDO4 = new MultiPleDeploymentDO(metadataLogId4, bOrgId, bOrgToken,
 				bOrgRefreshToken, bOrgURL);*/
-		multiPleDeploymentDOs.add(multiPleDeploymentDO);
+		//multiPleDeploymentDOs.add(multiPleDeploymentDO);
 		// multiPleDeploymentDOs.add(multiPleDeploymentDO1);
 		/*
 		 * multiPleDeploymentDOs.add(multiPleDeploymentDO2);
@@ -118,7 +118,7 @@ public class ForceDepService {
 
 		// System.out.println(multiPleDeploymentDOs.toString());
 
-		 deploy(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken,
+		/* deploy(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken,
 		  multiPleDeploymentDOs, true);
 		 
 		/*deployRecentValidation(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken, multiPleDeploymentDOs, false);*/
