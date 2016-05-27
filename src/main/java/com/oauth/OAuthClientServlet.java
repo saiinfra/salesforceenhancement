@@ -110,14 +110,23 @@ public class OAuthClientServlet extends HttpServlet {
 	private void processPostRequest(PostMethod post) {
 		try {
 
+			Properties p = new Properties();
+
+			try {
+				p.load(getServletContext().getResourceAsStream("/WEB-INF/properties/config.properties"));
+
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
 			HttpClient httpclient = new HttpClient();
 
 			if (!getEnvironment().equals(Constants.LoginEnv)) {
 				HttpConnectionManager conManager = httpclient.getHttpConnectionManager();
-				httpclient.getHostConfiguration().setProxy("us-east-1-static-hopper.quotaguard.com", 9293);
+				httpclient.getHostConfiguration().setProxy(p.getProperty("quotaguardserverurl"), 9293);
 				HttpState state = new HttpState();
 				state.setProxyCredentials(null, null,
-						new UsernamePasswordCredentials("quotaguard5169", "5a787ae0aef1"));
+						new UsernamePasswordCredentials(p.getProperty("quotaguardusername"), p.getProperty("quotaguardpassword")));
 				httpclient.setState(state);
 
 			}

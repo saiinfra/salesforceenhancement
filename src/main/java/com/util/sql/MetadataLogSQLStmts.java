@@ -28,7 +28,13 @@ public class MetadataLogSQLStmts {
 		System.out.println(sql);
 		return sql;
 	}
+	public static String selectRecords2(String OrgId) {
 
+		String sql = "SELECT Id " + " FROM OFSServer__MetadataDescription__c"
+				+ " where OFSServer__OrganizationId__c= '" + OrgId + "' ";
+		System.out.println(sql);
+		return sql;
+	}
 	public static String getRefreshMetadata(String metadataLogId) {
 
 		String sql = "SELECT Id, Name, OFSServer__MetadataLog__c,OFSServer__Type__c"

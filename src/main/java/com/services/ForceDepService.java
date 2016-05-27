@@ -1,5 +1,6 @@
 package com.services;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -25,12 +26,12 @@ public class ForceDepService {
 		// c_t =
 		// "00DS0000003Km6L!AQsAQFe_T3SXsKTpVRuZxE44jBIKQz3AsTRouOS1pTx2JeyqIEa0Q0flNY3DpKGEl6Av5wW1t2.5j4oUcOr0vhcxpTBD8IH1";
 
-		
-		 String metadataLogId = "a0436000003hqTb"; 
+	/*	
+		 String metadataLogId = "a0436000003iZu5"; 
 		 String bOrgId ="00D36000000L6GgEAK"; 
-		 String bOrgToken = "00D36000000L6Gg!ARQAQDM9ho.BeFGWHNdk65UzTnHXEY8orkKLgJ6ROs46BQH3dBDSNu6sMb4.2BK_m4tqkqBCOK1F.VWqiqgzG4voGidMGhxa";
+		 String bOrgToken = "00D36000000L6Gg!ARQAQGKiuM6KmuwGgRB_MYP5qDCHCKWfxaIeUH7JDHDJjeANVTDB2ukzRL02HEZzAAe_qdL4mQx3NAHBoHv7H9RwsXhc8sjZ";
 		 String bOrgURL = "https://na30.salesforce.com"; 
-		 String refreshToken ="5Aep861QbHyftz0nI8oi1AwNQkWJGd9W7nKhOtgJnHqggUNq_G7rJvoRgbNkSY7FToNbPu5bRQcXA==";
+		 String refreshToken ="5Aep861QbHyftz0nI8oi1AwNQkWJGd9W7nKhOtgyNi1fQckfNindIBE591DDxG9Zkp9n9KoHNE1Ac_y_Hch2cmc";
 		 retrieveClient(bOrgId, bOrgToken, bOrgURL, refreshToken,metadataLogId); /* * getPackages(bOrgId, bOrgToken, bOrgURL,
 		 * refreshToken, releaseParentId, releaseParentName, releaseStatus,
 		 * metadataLogId); // retrieve(bOrgId, bOrgToken, bOrgURL,refreshToken,
@@ -83,10 +84,10 @@ public class ForceDepService {
 		// executeScript(Constants.userId, Constants.passwd,
 		// Constants.serverURL,"a0161000002rbAS");
 
-		/*String bOrgId = "00D36000000L6NwEAK";
-		String bOrgRefreshToken = "5Aep861QbHyftz0nI9EQCBdPQPngCvXhaRLMS0L0bB8yu6je7XkcRWEctxFWthwlThi8M1yb0IPI6OEGxGbgXbk";
-		String bOrgToken = "00D36000000L6Nw!AQgAQCN23l6wrC62gnXrMttaTtiUNlj3Qg5JyOFZ4eUkc2AaCjyNvOrUh0sYlNEr_UqHLwq8v_zNnA_3KQMhjg8Xe4jnccI4";
-		String metadataLogId = "a0536000004vKKC";
+		String bOrgId = "00D36000000L6NwEAK";
+		String bOrgRefreshToken = "5Aep861QbHyftz0nI9EQCBdPQPngCvXhaRLMS0L60dauyQnougU9hZ7KVVKGWy_eYqrlATC9WFYOtXUJI3MJUVV";
+		String bOrgToken = "00D36000000L6Nw!AQgAQOo02V7a1UVLGONgtdCLJvm4G8TBpibCuXyF0Quli4LUFfoCsntXHFX88Uq5uNPhJAsWuVmNAlTX9C_b7X3bHJrqc.Yf";
+		String metadataLogId = "a0536000004xMr5";
 		String metadataLogId1 = "a05360000030Qwc";
 		String metadataLogId2 = "a05360000030FRGAA2";
 		String metadataLogId3 = "a05360000030FRHAA2";
@@ -106,7 +107,7 @@ public class ForceDepService {
 				bOrgRefreshToken, bOrgURL);
 		MultiPleDeploymentDO multiPleDeploymentDO4 = new MultiPleDeploymentDO(metadataLogId4, bOrgId, bOrgToken,
 				bOrgRefreshToken, bOrgURL);*/
-		//multiPleDeploymentDOs.add(multiPleDeploymentDO);
+		multiPleDeploymentDOs.add(multiPleDeploymentDO);
 		// multiPleDeploymentDOs.add(multiPleDeploymentDO1);
 		/*
 		 * multiPleDeploymentDOs.add(multiPleDeploymentDO2);
@@ -116,7 +117,7 @@ public class ForceDepService {
 
 		// System.out.println(multiPleDeploymentDOs.toString());
 
-		/* deploy(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken,
+		 deploy(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken,
 		  multiPleDeploymentDOs, true);
 		 
 		/*deployRecentValidation(bOrgId, bOrgToken, bOrgURL, bOrgRefreshToken, multiPleDeploymentDOs, false);*/

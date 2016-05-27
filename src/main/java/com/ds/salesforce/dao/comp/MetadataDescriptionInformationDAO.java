@@ -36,7 +36,8 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 		return false;
 	}
 
-	public boolean insert(MetaBean[] deployObjArr, String metadataLogId, String sOrgId, SFoAuthHandle sfHandle) {
+	public boolean insert(MetaBean[] deployObjArr, String metadataLogId,
+			String sOrgId, SFoAuthHandle sfHandle) {
 		int retVal = 1;
 
 		// create the records
@@ -49,10 +50,13 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 				a.setOFSClient__Name__c(deployObjArr[i].getName());
 				a.setOFSClient__Type__c(deployObjArr[i].getType());
 				a.setOFSClient__OrganizationId__c(sOrgId);
-				a.setOFSClient__LastModifiedById__c(deployObjArr[i].getLastModifiedById());
-				a.setOFSClient__LastModifiedByName__c(deployObjArr[i].getLastModifiedByName());
+				a.setOFSClient__LastModifiedById__c(deployObjArr[i]
+						.getLastModifiedById());
+				a.setOFSClient__LastModifiedByName__c(deployObjArr[i]
+						.getLastModifiedByName());
 
-				a.setOFSClient__LastModifiedDate__c(deployObjArr[i].getLastModifiedByDate());
+				a.setOFSClient__LastModifiedDate__c(deployObjArr[i]
+						.getLastModifiedByDate());
 
 				records[i] = a;
 			}
@@ -62,7 +66,8 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 			}
 		} catch (Exception ce) {
 			// fce.printStackTrace();
-			throw new SFException(ce.toString(), SFErrorCodes.SFMetadataDescription_Insert_Error);
+			throw new SFException(ce.toString(),
+					SFErrorCodes.SFMetadataDescription_Insert_Error);
 		}
 		return false;
 	}
@@ -86,24 +91,35 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 	}
 
 	@Override
-	public List<Object> findById(String metadataLogIdName, SFoAuthHandle sfHandle) {
+	public List<Object> findById(String metadataLogIdName,
+			SFoAuthHandle sfHandle) {
 		return null;
 	}
 
-	public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle sfHandle, String orgId,String type) {
+	public List<MetaBean> findById1(String metadataLogId,
+			SFoAuthHandle sfHandle, String orgId, String type) {
 
 		com.sforce.soap.enterprise.sobject.OFSClient__MetadataDescriptionInformation__c metadataDescriptionInformation__c = null;
 		List<MetaBean> list = new ArrayList<MetaBean>();
+		QueryResult queryResults = null;
 		try {
 			EnterpriseConnection conn = sfHandle.getEnterpriseConnection();
 			conn.setQueryOptions(1000);
-			QueryResult queryResults = conn.query(MetadataLogInformationSQLStmts.selectRecords(orgId,type));
+			if (type != "" && type != null) {
+				queryResults = conn.query(MetadataLogInformationSQLStmts
+						.selectRecords(orgId, type));
+			} else {
+				queryResults = conn.query(MetadataLogInformationSQLStmts
+						.selectRecords2(orgId));
+
+			}
 			boolean done = false;
 			int loopCount = 0;
 
 			while (!done) {
 
-				System.out.println("Records in results set " + loopCount++ + " - ");
+				System.out.println("Records in results set " + loopCount++
+						+ " - ");
 				MetaBean metaBean = null;
 
 				// Process the query results
@@ -112,7 +128,8 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 					metadataDescriptionInformation__c = (com.sforce.soap.enterprise.sobject.OFSClient__MetadataDescriptionInformation__c) queryResults
 							.getRecords()[i];
 
-					metaBean = new MetaBean(metadataDescriptionInformation__c.getId());
+					metaBean = new MetaBean(
+							metadataDescriptionInformation__c.getId());
 					list.add(metaBean);
 
 				}
@@ -120,14 +137,16 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 				if (queryResults.isDone()) {
 					done = true;
 				} else {
-					queryResults = conn.queryMore(queryResults.getQueryLocator());
+					queryResults = conn.queryMore(queryResults
+							.getQueryLocator());
 				}
 
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new SFException(e.toString(), SFErrorCodes.SFMetadataLog_Query_Error);
+			throw new SFException(e.toString(),
+					SFErrorCodes.SFMetadataLog_Query_Error);
 		}
 		return list;
 
@@ -137,37 +156,46 @@ public class MetadataDescriptionInformationDAO implements ISFBaseDAO {
 	public boolean commit(SObject[] sobjects, SFoAuthHandle sfHandle) {
 		// System.out.println("SAVE--"+sfHandle.getUserId()+"--"+sfHandle.getPasswd());
 		try {
-			com.sforce.soap.enterprise.SaveResult[] saveResults = sfHandle.getEnterpriseConnection().create(sobjects);
+			com.sforce.soap.enterprise.SaveResult[] saveResults = sfHandle
+					.getEnterpriseConnection().create(sobjects);
 
 			// check the returned results for any errors
 			for (int i = 0; i < saveResults.length; i++) {
 				if (saveResults[i].isSuccess()) {
-					System.out.println(i + ". Successfully created MetadataDescriptionInformation record - Id: "
-							+ saveResults[i].getId());
+					System.out
+							.println(i
+									+ ". Successfully created MetadataDescriptionInformation record - Id: "
+									+ saveResults[i].getId());
 				} else {
-					com.sforce.soap.enterprise.Error[] errors = saveResults[i].getErrors();
+					com.sforce.soap.enterprise.Error[] errors = saveResults[i]
+							.getErrors();
 					StringBuffer sb = new StringBuffer();
 					for (int j = 0; j < errors.length; j++) {
 						sb.append(errors[j].getMessage());
 						sb.append("\n");
-						System.out.println("ERROR creating record: " + errors[j].getMessage());
+						System.out.println("ERROR creating record: "
+								+ errors[j].getMessage());
 					}
-					throw new SFException(sb.toString(), SFErrorCodes.SFMetadataDescription_Insert_Error);
+					throw new SFException(sb.toString(),
+							SFErrorCodes.SFMetadataDescription_Insert_Error);
 				}
 			}
 		} catch (Exception e) {
-			throw new SFException(e.toString(), SFErrorCodes.SFMetadataDescription_Insert_Error);
+			throw new SFException(e.toString(),
+					SFErrorCodes.SFMetadataDescription_Insert_Error);
 		}
 		return true;
 	}
 
 	public boolean deleteRecords(String[] ids, SFoAuthHandle sfHandle) {
 		try {
-			com.sforce.soap.enterprise.DeleteResult[] deleteResults = sfHandle.getEnterpriseConnection().delete(ids);
+			com.sforce.soap.enterprise.DeleteResult[] deleteResults = sfHandle
+					.getEnterpriseConnection().delete(ids);
 			for (int i = 0; i < deleteResults.length; i++) {
 				com.sforce.soap.enterprise.DeleteResult deleteResult = deleteResults[i];
 				if (deleteResult.isSuccess()) {
-					System.out.println("Deleted Record ID: " + deleteResult.getId());
+					System.out.println("Deleted Record ID: "
+							+ deleteResult.getId());
 
 				}
 			}

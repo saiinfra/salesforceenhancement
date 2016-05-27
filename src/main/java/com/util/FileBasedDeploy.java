@@ -93,6 +93,9 @@ public class FileBasedDeploy {
 			if (testlevel.equals("RunAllTestsInOrg")) {
 				deployOptions.setTestLevel(TestLevel.RunAllTestsInOrg);
 
+			} else {
+				deployOptions.setTestLevel(TestLevel.RunLocalTests);
+
 			}
 
 		}

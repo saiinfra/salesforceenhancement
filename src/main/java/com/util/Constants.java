@@ -36,7 +36,7 @@ public class Constants {
 			"CustomObject", "CustomObjectTranslation", "CustomTab",
 			"Dashboard", "Document", "EmailTemplate", "EscalationRule",
 			"EscalationRules", "HomePageLayout", "Layout", "ListView",
-			"MatchingRules", "MatchingRules", "Profile", "PermissionSet",
+			"MatchingRules", "Profile", "PermissionSet",
 			"QuickAction", "RemoteSiteSetting", "Report", "ReportType", "Role",
 			"Settings", "SharingRules", "StaticResource", "WebLink",
 			"CustomPageWebLink", "Workflow", "Queue", "ApprovalProcess",

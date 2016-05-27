@@ -90,83 +90,52 @@ public class MetadataDescriptionDAO implements ISFBaseDAO {
 		return false;
 	}
 
-	public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle sfHandle,
-			String orgId,String bOrgId, String bOrgToken, String bOrgURL, String refreshToken,String type) {
+	public List<MetaBean> findById1(String metadataLogId,
+			SFoAuthHandle sfHandle, String orgId, String bOrgId,
+			String bOrgToken, String bOrgURL, String refreshToken, String type) {
 
 		com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c metadataDescription__c = null;
 		List<MetaBean> list = new ArrayList<MetaBean>();
+		QueryResult queryResults = null;
 		try {
 			EnterpriseConnection conn = sfHandle.getEnterpriseConnection();
 			conn.setQueryOptions(1000);
-			QueryResult queryResults = conn.query(MetadataLogSQLStmts
-					.selectRecords(orgId,type));
-	        boolean done = false;
-	        int loopCount = 0;
+			if (type != "" && type != null) {
+				queryResults = conn.query(MetadataLogSQLStmts.selectRecords(
+						orgId, type));
+			} else {
+				queryResults = conn.query(MetadataLogSQLStmts
+						.selectRecords2(orgId));
+			}
+			boolean done = false;
+			int loopCount = 0;
 
-	        while(!done)
-	        {
-	        	
-	            System.out.println("Records in results set " + loopCount++
-	                    + " - ");
+			while (!done) {
+
+				System.out.println("Records in results set " + loopCount++
+						+ " - ");
 				MetaBean metaBean = null;
 
-	            // Process the query results
-	            for (int i = 0; i < queryResults.getRecords().length; i++) {
-	            	
+				// Process the query results
+				for (int i = 0; i < queryResults.getRecords().length; i++) {
+
 					metadataDescription__c = (com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c) queryResults
 							.getRecords()[i];
 
 					metaBean = new MetaBean(metadataDescription__c.getId());
 					list.add(metaBean);
 
-	            }
-
-	            if (queryResults.isDone()) {
-	                done = true;
-	            } else {
-	            	queryResults = conn.queryMore(queryResults.getQueryLocator());
-	            }
-	
-	        	
-	        }
-
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SFException(e.toString(),
-					SFErrorCodes.SFMetadataLog_Query_Error);
-		}
-		return list;
-
-	}
-	/*public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle sfHandle,
-			String orgId) {
-
-		com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c metadataDescription__c = null;
-		List<MetaBean> list = new ArrayList<MetaBean>();
-		try {
-			EnterpriseConnection conn = sfHandle.getEnterpriseConnection();
-			QueryResult queryResults = conn.query(MetadataLogSQLStmts
-					.selectRecords(orgId));
-
-			System.out.println("No of Records " + queryResults.getSize());
-
-			if (queryResults.getSize() > 0) {
-				MetaBean metaBean = null;
-				for (int i = 0; i < queryResults.getRecords().length; i++) {
-					metadataDescription__c = (com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c) queryResults
-							.getRecords()[i];
-
-					metadataDescriptionDO = new MetadataDescriptionDO(
-							metadataDescription__c.getId());
-
-					list.add(metadataDescriptionDO);
 				}
-			} else {
-				System.out.println(" There are no records size is - : "
-						+ queryResults.getSize());
+
+				if (queryResults.isDone()) {
+					done = true;
+				} else {
+					queryResults = conn.queryMore(queryResults
+							.getQueryLocator());
+				}
 
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new SFException(e.toString(),
@@ -175,25 +144,55 @@ public class MetadataDescriptionDAO implements ISFBaseDAO {
 		return list;
 
 	}
-*/
 
+	/*
+	 * public List<MetaBean> findById1(String metadataLogId, SFoAuthHandle
+	 * sfHandle, String orgId) {
+	 * 
+	 * com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c
+	 * metadataDescription__c = null; List<MetaBean> list = new
+	 * ArrayList<MetaBean>(); try { EnterpriseConnection conn =
+	 * sfHandle.getEnterpriseConnection(); QueryResult queryResults =
+	 * conn.query(MetadataLogSQLStmts .selectRecords(orgId));
+	 * 
+	 * System.out.println("No of Records " + queryResults.getSize());
+	 * 
+	 * if (queryResults.getSize() > 0) { MetaBean metaBean = null; for (int i =
+	 * 0; i < queryResults.getRecords().length; i++) { metadataDescription__c =
+	 * (com.sforce.soap.enterprise.sobject.OFSServer__MetadataDescription__c)
+	 * queryResults .getRecords()[i];
+	 * 
+	 * metadataDescriptionDO = new MetadataDescriptionDO(
+	 * metadataDescription__c.getId());
+	 * 
+	 * list.add(metadataDescriptionDO); } } else {
+	 * System.out.println(" There are no records size is - : " +
+	 * queryResults.getSize());
+	 * 
+	 * } } catch (Exception e) { e.printStackTrace(); throw new
+	 * SFException(e.toString(), SFErrorCodes.SFMetadataLog_Query_Error); }
+	 * return list;
+	 * 
+	 * }
+	 */
 
 	public boolean deleteRecords(String[] ids, SFoAuthHandle sfHandle) {
-		   try {
-			   com.sforce.soap.enterprise.DeleteResult[] deleteResults = sfHandle.getEnterpriseConnection().delete(ids);
-		      for (int i = 0; i < deleteResults.length; i++) {
-		    	  com.sforce.soap.enterprise. DeleteResult deleteResult = deleteResults[i];
-		         if (deleteResult.isSuccess()) {
-		            System.out
-		                  .println("Deleted Record ID: " + deleteResult.getId());
-		        
-		         }
-		      }
-		   } catch (Exception ce) {
-		      ce.printStackTrace();
-		   }
-		   return true;
+		try {
+			com.sforce.soap.enterprise.DeleteResult[] deleteResults = sfHandle
+					.getEnterpriseConnection().delete(ids);
+			for (int i = 0; i < deleteResults.length; i++) {
+				com.sforce.soap.enterprise.DeleteResult deleteResult = deleteResults[i];
+				if (deleteResult.isSuccess()) {
+					System.out.println("Deleted Record ID: "
+							+ deleteResult.getId());
+
+				}
+			}
+		} catch (Exception ce) {
+			ce.printStackTrace();
 		}
+		return true;
+	}
 
 	@Override
 	public boolean commit(SObject[] sobjects, SFoAuthHandle sfHandle) {

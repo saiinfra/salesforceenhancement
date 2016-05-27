@@ -100,11 +100,52 @@ public class FDRetrieveClientCompService {
 					// delete records from metadatadescriotion table
 
 					MetadataDescriptionInformationDAO metadataDescriptionInformationDAO = new MetadataDescriptionInformationDAO();
+					if (listfromrefreshMetadataTypes.size() > 0) {
 
-					for (Iterator iterator = listfromrefreshMetadataTypes
-							.iterator(); iterator.hasNext();) {
-						RefreshMetadataInformationDO refreshMetadataDO = (RefreshMetadataInformationDO) iterator
-								.next();
+						for (Iterator iterator = listfromrefreshMetadataTypes
+								.iterator(); iterator.hasNext();) {
+							RefreshMetadataInformationDO refreshMetadataDO = (RefreshMetadataInformationDO) iterator
+									.next();
+
+							List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
+									.findById1(
+											metadataLogInformationDO.getId(),
+											fdGetSFoAuthHandleService
+													.getSFoAuthHandle(
+															bOrgId,
+															bOrgToken,
+															bOrgURL,
+															refreshToken,
+															Constants.CustomBaseOrgID),
+											envSoureDO.getOrgId(),
+											refreshMetadataDO.getType());
+
+							if (metabeanListFromDb.size() > 0) {
+
+								doBulkDeletes(metabeanListFromDb, bOrgId,
+										bOrgToken, bOrgURL, refreshToken);
+
+							}
+
+							// refresh connection
+							fdGetSFoAuthHandleService.setSfHandleToNUll();
+							List<MetaBean> mainMBList = getRetrieveObjListFromSource(
+									metadataLogInformationDO.getLogName(),
+									fdGetSFoAuthHandleService.getSFoAuthHandle(
+											envSoureDO,
+											Constants.CustomBaseOrgID),
+									listfromrefreshMetadataTypes);
+
+							// Do bulk inserts in Base Environment Organisation.
+							doBulkInserts(mainMBList, bOrgId, bOrgToken,
+									bOrgURL, refreshToken);
+
+							// Update Success message
+							fdGetSFoAuthHandleService.setSfHandleToNUll();
+
+						}
+
+					} else {
 
 						List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
 								.findById1(
@@ -116,7 +157,7 @@ public class FDRetrieveClientCompService {
 														bOrgURL,
 														refreshToken,
 														Constants.CustomBaseOrgID),
-										envSoureDO.getOrgId(),refreshMetadataDO.getType());
+										envSoureDO.getOrgId(), null);
 
 						if (metabeanListFromDb.size() > 0) {
 
@@ -125,22 +166,22 @@ public class FDRetrieveClientCompService {
 
 						}
 
+						// refresh connection
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+						List<MetaBean> mainMBList = getRetrieveObjListFromSource(
+								metadataLogInformationDO.getLogName(),
+								fdGetSFoAuthHandleService.getSFoAuthHandle(
+										envSoureDO, Constants.CustomBaseOrgID),
+								null);
+
+						// Do bulk inserts in Base Environment Organisation.
+						doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL,
+								refreshToken);
+
+						// Update Success message
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+
 					}
-
-					// refresh connection
-					fdGetSFoAuthHandleService.setSfHandleToNUll();
-					List<MetaBean> mainMBList = getRetrieveObjListFromSource(
-							metadataLogInformationDO.getLogName(),
-							fdGetSFoAuthHandleService.getSFoAuthHandle(
-									envSoureDO, Constants.CustomBaseOrgID),
-							listfromrefreshMetadataTypes);
-
-					// Do bulk inserts in Base Environment Organisation.
-					doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL,
-							refreshToken);
-
-					// Update Success message
-					fdGetSFoAuthHandleService.setSfHandleToNUll();
 					// updating metadataLog
 					RDAppService.updateMetadataLogInformationStatus(
 							metadataLogInformationDO,
@@ -223,25 +264,47 @@ public class FDRetrieveClientCompService {
 
 		try {
 
-			for (Iterator iterator = listtypes.iterator(); iterator.hasNext();) {
-				RefreshMetadataInformationDO refreshMetadataInformationDO = (RefreshMetadataInformationDO) iterator
-						.next();
+			if (listtypes != null) {
 
-				String contentType = refreshMetadataInformationDO.getType();
-				// getting list of objects from source
-				FDGetComponentsTypesCompService getAllComponents = new FDGetComponentsTypesCompService();
-				// refresh connection
-				fdGetSFoAuthHandleService.setSfHandleToNUll();
-				List<MetaBean> metaBeanList = getAllComponents
-						.listMetadataObjects(logName, contentType, sfHandle);
-				System.out.println("record size of " + contentType + " is : "
-						+ metaBeanList.size());
-				mainMBList.addAll(metaBeanList);
-				if (sfSourceHandle != null) {
-					sfSourceHandle.nullify();
+				for (Iterator iterator = listtypes.iterator(); iterator
+						.hasNext();) {
+					RefreshMetadataInformationDO refreshMetadataInformationDO = (RefreshMetadataInformationDO) iterator
+							.next();
+
+					String contentType = refreshMetadataInformationDO.getType();
+					// getting list of objects from source
+					FDGetComponentsTypesCompService getAllComponents = new FDGetComponentsTypesCompService();
+					// refresh connection
+					fdGetSFoAuthHandleService.setSfHandleToNUll();
+					List<MetaBean> metaBeanList = getAllComponents
+							.listMetadataObjects(logName, contentType, sfHandle);
+					System.out.println("record size of " + contentType
+							+ " is : " + metaBeanList.size());
+					mainMBList.addAll(metaBeanList);
+					if (sfSourceHandle != null) {
+						sfSourceHandle.nullify();
+					}
+					sfSourceHandle = null;
+					fdGetSFoAuthHandleService.setSfHandleToNUll();
 				}
-				sfSourceHandle = null;
-				fdGetSFoAuthHandleService.setSfHandleToNUll();
+			} else {
+				for (int k = 0; k < Constants.SFTypes.length; k++) {
+					String contentType = Constants.SFTypes[k];
+					// getting list of objects from source
+					FDGetComponentsTypesCompService getAllComponents = new FDGetComponentsTypesCompService();
+					// refresh connection
+					fdGetSFoAuthHandleService.setSfHandleToNUll();
+					List<MetaBean> metaBeanList = getAllComponents
+							.listMetadataObjects(logName, contentType, sfHandle);
+					System.out.println("record size of " + contentType
+							+ " is : " + metaBeanList.size());
+					mainMBList.addAll(metaBeanList);
+					if (sfSourceHandle != null) {
+						sfSourceHandle.nullify();
+					}
+					sfSourceHandle = null;
+					fdGetSFoAuthHandleService.setSfHandleToNUll();
+				}
 			}
 			System.out.println("Total record size of all contenttypes is : "
 					+ mainMBList.size());
