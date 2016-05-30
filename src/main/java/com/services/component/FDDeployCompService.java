@@ -371,7 +371,7 @@ public class FDDeployCompService {
 			retrieveObjectsFromSource.retrieve(sfSourceHandle, packageName,
 					metadataLogDO);
 		} catch (Exception e) {
-			System.out.println(e.toString());
+			System.out.println(e.toString()); 
 			throw new SFException(e.toString(), SFErrorCodes.FileRetrieve_Error);
 		}
 

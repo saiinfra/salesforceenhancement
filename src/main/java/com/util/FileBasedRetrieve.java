@@ -174,6 +174,8 @@ public class FileBasedRetrieve {
 		try {
 			System.out.println("Manifest file: "
 					+ unpackedManifest.getAbsolutePath());
+			
+		
 
 			if (!unpackedManifest.exists() || !unpackedManifest.isFile()) {
 				throw new SFException(
