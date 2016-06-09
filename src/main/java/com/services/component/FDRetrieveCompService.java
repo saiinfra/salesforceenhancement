@@ -94,6 +94,9 @@ public class FDRetrieveCompService {
 									.getSFoAuthHandle(bOrgId, bOrgToken,
 											bOrgURL, refreshToken,
 											Constants.BaseOrgID));
+					List<MetaBean> metabeanListFromDbb = new ArrayList();
+					List<MetaBean> metabeanListFromDb=null;
+
 					MetadataDescriptionDAO metadataDescriptionDAO = new MetadataDescriptionDAO();
 
 					if (listfromrefreshMetadataTypes.size() > 0) {
@@ -102,7 +105,7 @@ public class FDRetrieveCompService {
 							RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator
 									.next();
 
-							List<MetaBean> metabeanListFromDb = metadataDescriptionDAO
+						 metabeanListFromDb = metadataDescriptionDAO
 									.findById1(
 											metadataLogDO.getId(),
 											fdGetSFoAuthHandleService
@@ -113,34 +116,34 @@ public class FDRetrieveCompService {
 											envSoureDO.getOrgId(), bOrgId,
 											bOrgToken, bOrgURL, refreshToken,
 											refreshMetadataDO.getType());
-							if (metabeanListFromDb.size() > 0) {
 
-								doBulkDeletes(metabeanListFromDb, bOrgId,
-										bOrgToken, bOrgURL, refreshToken);
-
-							}
-
-							fdGetSFoAuthHandleService.setSfHandleToNUll();
-							List<MetaBean> mainMBList = getRetrieveObjListFromSource(
-									metadataLogDO.getLogName(),
-									fdGetSFoAuthHandleService.getSFoAuthHandle(
-											envSoureDO, Constants.CustomOrgID),
-									listfromrefreshMetadataTypes);
-
-							System.out.println("source Organization Id "
-									+ envSoureDO.getOrgId());
-
-							// Do bulk inserts in Base Env
-							doBulkInserts(mainMBList, bOrgId, bOrgToken,
-									bOrgURL, refreshToken);
-
-							// Update Success message
-							fdGetSFoAuthHandleService.setSfHandleToNUll();
+							metabeanListFromDbb.addAll(metabeanListFromDb);
 
 						}
+
+						doBulkDeletes(metabeanListFromDbb, bOrgId, bOrgToken,
+								bOrgURL, refreshToken);
+
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+						List<MetaBean> mainMBList = getRetrieveObjListFromSource(
+								metadataLogDO.getLogName(),
+								fdGetSFoAuthHandleService.getSFoAuthHandle(
+										envSoureDO, Constants.CustomOrgID),
+								listfromrefreshMetadataTypes);
+
+						System.out.println("source Organization Id "
+								+ envSoureDO.getOrgId());
+
+						// Do bulk inserts in Base Env
+						doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL,
+								refreshToken);
+
+						// Update Success message
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+
 					} else {
 
-						List<MetaBean> metabeanListFromDb = metadataDescriptionDAO
+					  metabeanListFromDb = metadataDescriptionDAO
 								.findById1(metadataLogDO.getId(),
 										fdGetSFoAuthHandleService
 												.getSFoAuthHandle(bOrgId,
@@ -258,7 +261,7 @@ public class FDRetrieveCompService {
 		List<MetaBean> mainMBList = new ArrayList<MetaBean>();
 		try {
 
-			if (typesList!=null) {
+			if (typesList != null) {
 				for (Iterator iterator = typesList.iterator(); iterator
 						.hasNext();) {
 					RefreshMetadataDO refreshMetadataDO = (RefreshMetadataDO) iterator

@@ -392,10 +392,10 @@ public class SFoAuthHandle {
 		post.addParameter("refresh_token", refreshToken);
 
 			HttpConnectionManager conManager = httpclient.getHttpConnectionManager();
-			httpclient.getHostConfiguration().setProxy("us-east-1-static-hopper.quotaguard.com", 9293);
+			httpclient.getHostConfiguration().setProxy("us-east-static-01.quotaguard.com", 9293);
 			HttpState state = new HttpState();
 			state.setProxyCredentials(null, null,
-					new UsernamePasswordCredentials("quotaguard5169", "5a787ae0aef1"));
+					new UsernamePasswordCredentials("quotaguard5648", "0e7ce2b67ea3"));
 			httpclient.setState(state);
 		
 

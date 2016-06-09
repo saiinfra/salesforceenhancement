@@ -96,6 +96,12 @@ public class FDDeployCompService {
 							fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
 									bOrgToken, bOrgURL, refreshToken,
 									Constants.BaseOrgID));
+					
+					List<Object> deployList1 = deployMetadataDAO.findById1(
+							metadataLogDO.getLogName(),
+							fdGetSFoAuthHandleService.getSFoAuthHandle(bOrgId,
+									bOrgToken, bOrgURL, refreshToken,
+									Constants.BaseOrgID));
 
 					fdGetSFoAuthHandleService.setSfHandleToNUll();
 					System.out.println(((MetaBean) deployList.get(0))
@@ -183,15 +189,36 @@ public class FDDeployCompService {
 							deployObjToTargetOrg(bOrgId, bOrgToken, bOrgURL,
 									refreshToken, sfSourceHandle,
 									sfTargetHandle, packageName, isValidate,
-									metadataLogDO);
+									metadataLogDO,deployList1);
 
 							Thread.sleep(Constants.waitFor1Sec);
 							msg = Constants.DEPLOY_SUCESS_MESSAGE;
 							if (action.equals("Validate"))
 								msg = Constants.VALIDATE_SUCESS_MESSAGE;
+							
+							if (action.equals("ValidateAll")) {
+								msg = Constants.VALIDATE_SUCESS_MESSAGE
+										+ " for All Packages";
+								RDAppService.updateDeploymentDetails(
+										metadataLogId, msg, metadataLogDO
+												.getSourceOrgId(),
+										fdGetSFoAuthHandleService
+												.getSFoAuthHandle(bOrgId,
+														bOrgToken, bOrgURL,
+														refreshToken,
+														Constants.BaseOrgID));
+							} 
 
 						} catch (Exception e) {
 							msg = e.getMessage();
+							RDAppService.updateDeploymentDetails(
+									metadataLogId, msg, metadataLogDO
+											.getSourceOrgId(),
+									fdGetSFoAuthHandleService
+											.getSFoAuthHandle(bOrgId,
+													bOrgToken, bOrgURL,
+													refreshToken,
+													Constants.BaseOrgID));
 						} finally {
 							// String packgNames =
 							// metadataLogDO.getNoOfPackgsByOrderMap().get(orderKey);
@@ -209,18 +236,7 @@ public class FDDeployCompService {
 														refreshToken,
 														Constants.BaseOrgID));
 							}
-							if (action.equals("ValidateAll")) {
-								msg = Constants.VALIDATE_SUCESS_MESSAGE
-										+ " for All Packages";
-								RDAppService.updateDeploymentDetails(
-										metadataLogId, msg, metadataLogDO
-												.getSourceOrgId(),
-										fdGetSFoAuthHandleService
-												.getSFoAuthHandle(bOrgId,
-														bOrgToken, bOrgURL,
-														refreshToken,
-														Constants.BaseOrgID));
-							} if (action.equals("Validate") ||  (action.equals("Deploy"))) {
+							if (action.equals("Validate") ||  (action.equals("Deploy"))) {
 								
 								
 								RDAppService.updateDeploymentDetails(
@@ -361,7 +377,7 @@ public class FDDeployCompService {
 	private void deployObjToTargetOrg(String bOrgId, String bOrgToken,
 			String bOrgURL, String refreshToken, SFoAuthHandle sfSourceHandle,
 			SFoAuthHandle sfTargetHandle, String packageName,
-			boolean isValidate, MetadataLogDO metadataLogDO) {
+			boolean isValidate, MetadataLogDO metadataLogDO,List<Object> deployList1) {
 
 		System.out.println("OAUTH TOKEN in DeployObject"
 				+ sfTargetHandle.getoAuthToken());
@@ -378,7 +394,7 @@ public class FDDeployCompService {
 		try {
 			(new FileBasedDeploy()).deploy(bOrgId, bOrgToken, bOrgURL,
 					refreshToken, sfTargetHandle, packageName, isValidate,
-					metadataLogDO.getId(),metadataLogDO.getTestLevel());
+					metadataLogDO.getId(),metadataLogDO.getTestLevel(),deployList1);
 		} catch (Exception e) { // e.printStackTrace(); //
 			System.out.println(e.toString());
 			throw new SFException(e.toString(), SFErrorCodes.FileDeploy_Error);

@@ -121,7 +121,6 @@ public class OAuthClientServlet extends HttpServlet {
 			
 			HttpClient httpclient = new HttpClient();
 
-			if (!getEnvironment().equals(Constants.LoginEnv)) {
 				HttpConnectionManager conManager = httpclient.getHttpConnectionManager();
 				httpclient.getHostConfiguration().setProxy(p.getProperty("quotaguardserverurl"), 9293);
 				HttpState state = new HttpState();
@@ -129,7 +128,7 @@ public class OAuthClientServlet extends HttpServlet {
 						new UsernamePasswordCredentials(p.getProperty("quotaguardusername"), p.getProperty("quotaguardpassword")));
 				httpclient.setState(state);
 
-			}
+			
 
 			httpclient.executeMethod(post);
 			JSONObject authResponse = new JSONObject(
@@ -174,9 +173,14 @@ public class OAuthClientServlet extends HttpServlet {
 		try {
 
 			processPostRequest(post);
+			System.out.println(" After ProcessPost Request: ");
 
 			getUserDetails(request, response);
+			System.out.println(" After getUserDetails Request: ");
+
 			updateEnvs(request, response);
+			System.out.println(" After updateEnvs Request: ");
+
 			System.out.println("Final Context Path: " + request.getContextPath());
 			EnvironmentInformationDO envDO = null;
 			String str1 = "";
@@ -216,11 +220,24 @@ public class OAuthClientServlet extends HttpServlet {
 
 	public void getUserDetails(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		System.out.println("session id in getUserDetails.." + request.getSession());
+
 		HttpSession session = request.getSession();
+		
 
 		String id = (String) session.getAttribute("id");
+		
+		System.out.println(" id.." + id);
+
 		String accessToken = (String) session.getAttribute("ACCESS_TOKEN");
+		
+		System.out.println("ACCESS_TOKEN.." + accessToken);
+
 		String instanceURL = (String) request.getSession().getAttribute(Constants.INSTANCE_URL);
+		
+		System.out.println(" instanceurl.." + instanceURL);
+
 		HttpClient httpclient = new HttpClient();
 		GetMethod get = new GetMethod(idURL);
 		// set the token in the header

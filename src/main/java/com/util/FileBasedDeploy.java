@@ -23,6 +23,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import com.domain.EnvironmentDO;
+import com.domain.MetaBean;
 import com.ds.salesforce.dao.comp.EnvironmentDAO;
 import com.exception.SFErrorCodes;
 import com.exception.SFException;
@@ -63,8 +64,8 @@ public class FileBasedDeploy {
 
 	public void deploy(String bOrgId, String bOrgToken, String bOrgURL,
 			String refreshToken, SFoAuthHandle sfHandle, String packageName,
-			boolean isValidate, String metatadataLogId, String testlevel)
-			throws Exception {
+			boolean isValidate, String metatadataLogId, String testlevel,
+			List<Object> deployList1) throws Exception {
 		count++;
 		FDGetSFoAuthHandleService fdGetSFoAuthHandleService = new FDGetSFoAuthHandleService();
 
@@ -76,6 +77,7 @@ public class FileBasedDeploy {
 		DeployOptions deployOptions = new DeployOptions();
 		deployOptions.setPerformRetrieve(false);
 		deployOptions.setRollbackOnError(true);
+	    String[] tests = null;
 		if (isValidate) {
 
 			deployOptions.setCheckOnly(true);
@@ -88,15 +90,22 @@ public class FileBasedDeploy {
 			}
 			if (testlevel.equals("RunSpecifiedTests")) {
 				deployOptions.setTestLevel(TestLevel.RunSpecifiedTests);
+				tests = new String[deployList1.size()];
+				int count = 0;
+				for (Iterator iterator = deployList1.iterator(); iterator
+						.hasNext();) {
+					MetaBean metaBean = (MetaBean) iterator.next();
+					tests[count] = metaBean.getName();
+					count++;
+				}
+				// Add the test class names array to the deployment options.
+				deployOptions.setRunTests(tests);
 
 			}
 			if (testlevel.equals("RunAllTestsInOrg")) {
 				deployOptions.setTestLevel(TestLevel.RunAllTestsInOrg);
 
-			} else {
-				deployOptions.setTestLevel(TestLevel.RunLocalTests);
-
-			}
+			} 
 
 		}
 		MetadataConnection conn = null;

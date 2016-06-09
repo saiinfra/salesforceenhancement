@@ -4,17 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.domain.EnvironmentDO;
 import com.domain.EnvironmentInformationDO;
 import com.domain.MetaBean;
-import com.domain.MetadataDescriptionDO;
-import com.domain.MetadataDescriptionInformationDO;
 import com.domain.MetadataLogInformationDO;
-import com.domain.RefreshMetadataDO;
 import com.domain.RefreshMetadataInformationDO;
-import com.ds.salesforce.dao.comp.MetadataDescriptionDAO;
 import com.ds.salesforce.dao.comp.MetadataDescriptionInformationDAO;
-import com.ds.salesforce.dao.comp.RefreshMetadataDAO;
 import com.ds.salesforce.dao.comp.RefreshMetadataInformationDAO;
 import com.exception.SFErrorCodes;
 import com.exception.SFException;
@@ -98,6 +92,9 @@ public class FDRetrieveClientCompService {
 											Constants.CustomBaseOrgID));
 
 					// delete records from metadatadescriotion table
+					List<MetaBean> metabeanListFromDbb = new ArrayList();
+
+					List<MetaBean> metabeanListFromDb = null;
 
 					MetadataDescriptionInformationDAO metadataDescriptionInformationDAO = new MetadataDescriptionInformationDAO();
 					if (listfromrefreshMetadataTypes.size() > 0) {
@@ -107,7 +104,7 @@ public class FDRetrieveClientCompService {
 							RefreshMetadataInformationDO refreshMetadataDO = (RefreshMetadataInformationDO) iterator
 									.next();
 
-							List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
+							metabeanListFromDb = metadataDescriptionInformationDAO
 									.findById1(
 											metadataLogInformationDO.getId(),
 											fdGetSFoAuthHandleService
@@ -120,34 +117,32 @@ public class FDRetrieveClientCompService {
 											envSoureDO.getOrgId(),
 											refreshMetadataDO.getType());
 
-							if (metabeanListFromDb.size() > 0) {
-
-								doBulkDeletes(metabeanListFromDb, bOrgId,
-										bOrgToken, bOrgURL, refreshToken);
-
-							}
-
-							// refresh connection
-							fdGetSFoAuthHandleService.setSfHandleToNUll();
-							List<MetaBean> mainMBList = getRetrieveObjListFromSource(
-									metadataLogInformationDO.getLogName(),
-									fdGetSFoAuthHandleService.getSFoAuthHandle(
-											envSoureDO,
-											Constants.CustomBaseOrgID),
-									listfromrefreshMetadataTypes);
+							metabeanListFromDbb.addAll(metabeanListFromDb);
 
 							// Do bulk inserts in Base Environment Organisation.
-							doBulkInserts(mainMBList, bOrgId, bOrgToken,
-									bOrgURL, refreshToken);
-
-							// Update Success message
-							fdGetSFoAuthHandleService.setSfHandleToNUll();
 
 						}
 
+						doBulkDeletes(metabeanListFromDbb, bOrgId, bOrgToken,
+								bOrgURL, refreshToken);
+
+						// refresh connection
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+						List<MetaBean> mainMBList = getRetrieveObjListFromSource(
+								metadataLogInformationDO.getLogName(),
+								fdGetSFoAuthHandleService.getSFoAuthHandle(
+										envSoureDO, Constants.CustomBaseOrgID),
+								listfromrefreshMetadataTypes);
+
+						doBulkInserts(mainMBList, bOrgId, bOrgToken, bOrgURL,
+								refreshToken);
+
+						// Update Success message
+						fdGetSFoAuthHandleService.setSfHandleToNUll();
+
 					} else {
 
-						List<MetaBean> metabeanListFromDb = metadataDescriptionInformationDAO
+						metabeanListFromDb = metadataDescriptionInformationDAO
 								.findById1(
 										metadataLogInformationDO.getId(),
 										fdGetSFoAuthHandleService

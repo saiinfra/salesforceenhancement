@@ -8,8 +8,22 @@ public class DeployMetadataSQLStmts {
 				+ " where "
 				+ " OFSServer__MetadataLog__r.Name='"
 				+ metadataLogIdName
-				+ "'" + " ORDER BY OFSServer__Order__c ASC NULLS LAST";
+				+ "'"
+				+ " ORDER BY OFSServer__Order__c ASC NULLS LAST";
 
 		return sql;
 	}
+
+	public static String getToBeDeployedRecordQueryApex(String metadataLogIdName) {
+		String type = "ApexClass";
+		String sql = "SELECT Id, OFSServer__Name__c, OFSServer__SourceOrganizationId__c, OFSServer__OrganizationId__c, "
+				+ " OFSServer__Type__c, OFSServer__Order__c, OFSServer__Package__c, OFSServer__MetadataLog__r.Name FROM OFSServer__DeployMetadata__c"
+				+ " where  OFSServer__MetadataLog__r.Name='"
+				+ metadataLogIdName
+				+ "' and OFSServer__Type__c='" + type + "' ORDER BY OFSServer__Order__c ASC NULLS LAST";
+
+		return sql;
+	}
+	
+	
 }

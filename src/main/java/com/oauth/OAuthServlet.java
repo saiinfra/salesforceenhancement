@@ -130,7 +130,6 @@ public class OAuthServlet extends HttpServlet {
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-			if (!getEnvironment().equals(Constants.LoginEnv)) {
 				HttpConnectionManager conManager = httpclient
 						.getHttpConnectionManager();
 				httpclient.getHostConfiguration().setProxy(p.getProperty("quotaguardserverurl"), 9293);
@@ -139,7 +138,7 @@ public class OAuthServlet extends HttpServlet {
 						new UsernamePasswordCredentials(p.getProperty("quotaguardusername"), p.getProperty("quotaguardpassword")));
 				httpclient.setState(state);
 
-			}
+			
 
 			httpclient.executeMethod(post);
 			JSONObject authResponse = new JSONObject(new JSONTokener(

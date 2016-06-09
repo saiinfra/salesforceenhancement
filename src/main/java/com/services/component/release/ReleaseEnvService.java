@@ -221,7 +221,7 @@ public class ReleaseEnvService {
 				}
 
 			} catch (Exception e) {
-				// TODO: handle exception
+				System.out.println("firt try-catch block");
 			}
 
 			for (GetPackageProcess element : linkedlist)
